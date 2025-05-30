@@ -1,84 +1,218 @@
-# WhaTicket Versão Saas com Módulo Kanban, Modo Noturno e as seguintes integrações:</br>
+# WhaTicket Saas v6.0.0
 
-🗣️ DialogFlow</br>
-🔄 N8N</br>
-🌐 WebHooks</br>
-🤖 TypeBot</br>
-💬 ChatGPT</br>
+<p align="center">
+  <img src="https://whatsapp.com/favicon.ico" width="100" alt="WhatsApp Logo">
+</p>
 
-Sugestão de VPS:
+<p align="center">
+  Sistema completo de atendimento multiusuário via WhatsApp com recursos avançados de automação e gestão de atendimento.
+</p>
 
-BASIC: 4 vCores, 6 GB de RAM e 100 GB de SSD NVMe $4.99 USD Mensal com taxa de setup de $4.99.
+---
 
-STANDARD: 6 vCores, 12 GB de RAM e 200 GB de SSD NVMe $9.99 USD Mensal com taxa de setup de $5.99.
+## 📑 Índice
 
-Informações Importantes:
-Apenas Suporte Básico
+1. [Visão Geral](#-visão-geral)
+2. [Recursos](#-recursos)
+3. [Tecnologias](#-tecnologias)
+4. [Arquitetura](#-arquitetura)
+5. [Instalação](#️-instalação)
+6. [Configuração](#-configuração)
+7. [Uso](#-uso)
+8. [API](#-api)
+9. [Desenvolvimento](#-desenvolvimento)
+10. [Implantação](#-implantação)
+11. [Suporte](#-suporte)
 
-Notas Internas:</br>
-Nova Atualização de Maio de 2025</br>
-Mantido Versão 6.0.0</br>
-Avaliaremos se os seguintes bugs das versão beta e a de abril foram corrigidos pelo próprio desenvolvedor: 
-Erro de Conexão, Erro Mensagem Fora do Expediente, Nome dos dias no modal de filas (ok), não criar faturas (ok), não editar empresas (ok), importar contatos do telefone (nok), não enviar e-mail de recuperação de senha (não testado).
+## 👀 Visão Geral
 
-📅 16/04/2025 – Versão 6.0.0
+O WhaTicket Saas é uma plataforma completa para gestão de atendimento via WhatsApp, desenvolvida para empresas que necessitam de uma solução robusta e escalável para comunicação com clientes. O sistema oferece recursos avançados de automação, integração com IA e uma interface moderna e intuitiva.
 
-🌑 Correções no Darkmode (dentro das mensagens)</br>
-🔄 Botão Light/Dark movido (está no perfil)</br>
-📊 Estilos dos cards da Dashboard alterados (removido botão de impressão)</br>
-🎟️ Estilo de ticket alterado</br>
-⚡ Respostas rápidas (layout novo)</br>
-📂 Correção no envio de menu (filas) – na 3ª tentativa é enviado automaticamente para a 1ª fila</br>
-🌍 Botão de tradução</br>
-⚠️ Aviso de contato (caso o ticket esteja aberto, é emitido um aviso)</br>
-🔧 Página de conexão reformulada</br>
-👑 Adicionada opção de SuperAdmin (dentro do popup do usuário)</br>
-📆 Correção no agendamento (agora envia imagem com texto)</br>
-♻️ Agendamento reformulado (com suporte a ciclos)</br> 
-🔐 Novo layout da tela de login</br>
-📝 Novo layout da tela de signup</br>
-🛠️ Correção de vazamento no WebSocket</br>
+### 🎯 Objetivos
+- Centralizar atendimentos via WhatsApp
+- Automatizar respostas e processos
+- Gerenciar equipes de atendimento
+- Monitorar performance e métricas
+- Integrar com sistemas externos
 
-📅 13/12/2024 – Versão 5.5.0
+### 💼 Casos de Uso
+- Suporte ao Cliente
+- Vendas e Marketing
+- Atendimento Automatizado
+- Gestão de Equipes
+- Análise de Desempenho
 
-🛠️ Correção ao redimensionar área de ticket</br>
-✅ Validação de número no ContactModal</br>
-🔄 Regressão OpenAI para versão 3.3.0 e wbotMessageListener.ts</br>
-🎧 Áudio no iPhone</br>
-📵 Recusando chamadas automaticamente</br>
-📲 Filas da conexão ao requisitar novo QR Code</br>
-📊 Dashboard reformulado</br>
-📈 Página de relatórios</br>
-🗂️ Kanban reformulado</br>
+## ✨ Recursos
 
-📅 07/11/2024 – Versão 5.3.5
+### 🤖 Integrações
+- **DialogFlow**: Chatbot inteligente com processamento de linguagem natural
+- **N8N**: Automação de fluxos de trabalho
+- **WebHooks**: Integração com sistemas externos
+- **TypeBot**: Criação de fluxos de conversação
+- **ChatGPT**: Respostas inteligentes com IA
 
-📅 Correção da Data de Vencimento no Topo: Data agora permanece fixa. </br>
-🔄 Automação em Grupos: Não envia automações para grupos. </br>
-🚫 Botão disableBot: Desabilita bots ou automações. </br>
-✉️ Correção de Mensagem Citada. </br>
-🔗 Permissão para Conexões com Mesmo Nome. </br>
-⏳ Expiração de Conexões: Desconexão automática após vencimento da empresa. </br>
-🗑️ Seleção para Deletar Contatos: Opção de seleção para exclusão na página “Contatos”. </br>
-🎵 Correção no Envio de Áudio OGG em respostas rápidas. </br>
-📂 Visualização de Tickets Fechados por Operador: Aba removida do painel de usuários. </br>
-📜 Visualização de Grupos por Operador: Aba removida do painel de usuários. </br>
-💸 Atualização Financeira após Alteração de Plano: Valor ajustado automaticamente na lista do Financeiro. </br>
+### 🚀 Funcionalidades Principais
+- **Sistema de Tickets**
+  - Fila de atendimento
+  - Priorização automática
+  - Tags e categorização
+  - Histórico completo
 
-24/07/2024 – Versão 5.2.6
+- **Gestão de Usuários**
+  - Múltiplos níveis de acesso
+  - Times e departamentos
+  - Metas e métricas
+  - Horários de trabalho
 
-✅ Fechar todos os tickets abertos ou em espera. </br>
-👍 Reagir a uma mensagem. </br>
-🔄 Encaminhar mensagens para outro ticket. </br>
-🎨 Aparência do menu aprimorada. </br>
-🚪 Botão “Sair” adicionado ao menu. </br>
-🗑️ Notificação quando uma mensagem é apagada no WhatsApp, informando no chat. </br>
-🔄 API atualizada. </br>
-🆕 Novo layout da página de login. </br>
-💬 Indicação “Digitando” ou “Gravando” aparece no ticket, no canto inferior direito, ao lado do nome. </br>
+- **Automação**
+  - Respostas rápidas
+  - Mensagens programadas
+  - Fluxos automatizados
+  - Chatbots integrados
 
-Biblioteca Baileys Atualizada:</br>
+- **Relatórios e Métricas**
+  - Dashboard em tempo real
+  - Relatórios personalizados
+  - Métricas de desempenho
+  - Exportação de dados
 
-V 6.7.16
+## 🔧 Arquitetura
 
-Instalador atualizado, versao NodeJS 20:
+### Backend (Node.js + TypeScript)
+- **API RESTful**: Express.js
+- **Banco de Dados**: Sequelize ORM
+- **Websockets**: Socket.io
+- **Filas**: Bull + Redis
+- **Autenticação**: JWT
+
+### Frontend (React)
+- **UI Framework**: Material-UI
+- **Estado**: Context API
+- **Roteamento**: React Router
+- **Formulários**: Formik + Yup
+- **Internacionalização**: i18next
+
+## ⚙️ Requisitos do Sistema
+
+### Mínimo
+- Node.js 20.x
+- MySQL 5.7+ ou PostgreSQL 10+
+- Redis 6+
+- 4 vCPUs
+- 6 GB RAM
+- 100 GB SSD
+
+### Recomendado
+- Node.js 20.x LTS
+- PostgreSQL 14+
+- Redis 7+
+- 6 vCPUs
+- 12 GB RAM
+- 200 GB SSD NVMe
+
+## 📚 API
+
+### Endpoints Principais
+
+\`\`\`
+POST   /api/auth/login            # Autenticação de usuário
+GET    /api/tickets              # Lista de tickets
+POST   /api/tickets              # Criar novo ticket
+GET    /api/tickets/:id          # Detalhes do ticket
+PUT    /api/tickets/:id          # Atualizar ticket
+POST   /api/messages            # Enviar mensagem
+GET    /api/contacts            # Lista de contatos
+GET    /api/reports             # Relatórios
+\`\`\`
+
+## 🛠️ Desenvolvimento
+
+### Estrutura do Projeto
+\`\`\`
+backend/
+  ├── src/
+  │   ├── controllers/     # Controladores da API
+  │   ├── services/        # Lógica de negócios
+  │   ├── models/          # Modelos do banco
+  │   ├── routes/          # Rotas da API
+  │   └── config/          # Configurações
+frontend/
+  ├── src/
+  │   ├── pages/          # Páginas da aplicação
+  │   ├── components/     # Componentes React
+  │   ├── services/       # Chamadas à API
+  │   └── context/        # Contextos globais
+\`\`\`
+
+### Fluxo de Desenvolvimento
+1. Clone o repositório
+2. Configure o ambiente
+3. Instale as dependências
+4. Execute as migrações
+5. Inicie os serviços
+
+## 🚀 Implantação
+
+### Usando Docker
+\`\`\`bash
+# Em desenvolvimento
+\`\`\`
+
+### Instalação Manual
+1. **Backend**
+\`\`\`bash
+cd backend
+npm install
+npm run build
+npm start
+\`\`\`
+
+2. **Frontend**
+\`\`\`bash
+cd frontend
+npm install
+npm run build
+npm start
+\`\`\`
+
+## 🔒 Segurança
+
+- Autenticação JWT
+- Rate Limiting
+- Validação de Entrada
+- Sanitização de Dados
+- CORS Configurável
+- Logs de Auditoria
+
+## 📈 Monitoramento
+
+- Logs do Sistema
+- Métricas de Performance
+- Alertas Automáticos
+- Monitoramento de Erros
+- Status das Conexões
+
+## 🤝 Suporte
+
+### Canais de Suporte
+- Documentação Online
+- Suporte por Email
+- Base de Conhecimento
+- Atualizações Regulares
+
+### SLA
+- Resposta inicial: 24h
+- Resolução de bugs: 48h
+- Atualizações de segurança: Imediato
+
+## 📝 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE.txt) para mais detalhes.
+
+## ⚠️ Notas Importantes
+
+- Versão atual: 6.0.0
+- Última atualização: Maio/2025
+- Compatibilidade garantida com Node.js 20.x
+- Backup diário recomendado
+- Monitoramento constante das conexões WhatsApp
