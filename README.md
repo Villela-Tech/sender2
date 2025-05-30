@@ -1,4 +1,4 @@
-# WhaTicket Saas v6.0.0
+# Sender 3.0
 
 <p align="center">
   <img src="https://whatsapp.com/favicon.ico" width="100" alt="WhatsApp Logo">
