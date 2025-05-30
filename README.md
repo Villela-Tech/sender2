@@ -1,186 +1,254 @@
-# WhaTicket SaaS v6.0.0
+# WhaTicket SaaS - Sistema de Atendimento WhatsApp
 
-<div align="center">
-<img src="frontend/src/assets/logo.png" alt="WhaTicket" width="350" height="auto">
-</div>
+## 📁 Estrutura do Projeto
 
-## 📋 Índice
+```
+├── backend/                  # Servidor Node.js
+│   ├── src/
+│   │   ├── @types/          # Definições de tipos TypeScript
+│   │   ├── config/          # Configurações do sistema
+│   │   ├── controllers/     # Controladores da aplicação
+│   │   ├── database/        # Migrações e configurações do banco
+│   │   ├── errors/         # Tratamento de erros customizados
+│   │   ├── helpers/        # Funções auxiliares
+│   │   ├── libs/           # Bibliotecas personalizadas
+│   │   ├── middleware/     # Middlewares Express
+│   │   ├── models/         # Modelos Sequelize
+│   │   ├── routes/         # Rotas da API
+│   │   ├── services/       # Lógica de negócios
+│   │   └── utils/          # Utilitários gerais
+│   └── package.json
+│
+├── frontend/                # Cliente React.js
+│   ├── src/
+│   │   ├── assets/         # Recursos estáticos
+│   │   ├── components/     # Componentes React
+│   │   ├── context/        # Contextos React
+│   │   ├── errors/         # Tratamento de erros
+│   │   ├── helpers/        # Funções auxiliares
+│   │   ├── hooks/          # Hooks React customizados
+│   │   ├── layout/         # Componentes de layout
+│   │   ├── pages/          # Páginas da aplicação
+│   │   ├── routes/         # Configuração de rotas
+│   │   ├── services/       # Serviços e APIs
+│   │   └── utils/          # Utilitários
+│   └── package.json
+```
 
-- [Sobre](#-sobre)
-- [Funcionalidades](#-funcionalidades)
-- [Tecnologias](#-tecnologias)
-- [Requisitos do Sistema](#-requisitos-do-sistema)
-- [Instalação](#-instalação)
-- [Configuração](#-configuração)
-- [Integrações](#-integrações)
-- [Atualizações](#-atualizações)
-- [Suporte](#-suporte)
-- [Licença](#-licença)
-
-## 📝 Sobre
-
-WhaTicket é uma solução SaaS (Software as a Service) para gestão de atendimento multiusuário via WhatsApp. O sistema permite gerenciar múltiplos atendentes e filas de atendimento, com suporte a diversos recursos avançados como Kanban, modo noturno e integrações com várias plataformas.
-
-## ✨ Funcionalidades
-
-- 👥 Gestão de múltiplos atendentes
-- 📊 Sistema Kanban para organização de tickets
-- 🌙 Modo Noturno
-- 📱 Múltiplas conexões de WhatsApp
-- 🤖 Chatbot com IA
-- 📊 Dashboard e relatórios
-- 🔄 Respostas rápidas
-- 📅 Sistema de agendamento
-- 👑 Painel administrativo
-- 🌐 Multi-empresa (SaaS)
-- 📲 Notificações em tempo real
-
-## 🛠 Tecnologias
+## 🔧 Componentes Principais
 
 ### Backend
-- Node.js
-- TypeScript
-- Express
-- Sequelize
-- PostgreSQL
-- Socket.IO
+
+#### 1. Estrutura de Dados
+- **Modelos**:
+  - User (Usuários)
+  - Queue (Filas)
+  - Ticket (Atendimentos)
+  - Contact (Contatos)
+  - Message (Mensagens)
+  - Whatsapp (Conexões)
+  - Queue (Filas de Atendimento)
+
+#### 2. APIs e Endpoints
+- **/auth**
+  - POST /login
+  - POST /refresh-token
+  - POST /logout
+
+- **/messages**
+  - GET /messages/:ticketId
+  - POST /messages/:ticketId
+  - DELETE /messages/:messageId
+
+- **/tickets**
+  - GET /tickets
+  - GET /tickets/:ticketId
+  - POST /tickets
+  - PUT /tickets/:ticketId
+  - DELETE /tickets/:ticketId
+
+- **/whatsapp**
+  - GET /whatsapp
+  - POST /whatsapp
+  - PUT /whatsapp/:whatsappId
+  - DELETE /whatsapp/:whatsappId
+  - POST /whatsapp/:whatsappId/qrcode
+  - POST /whatsapp/:whatsappId/restart
+
+#### 3. Serviços
+- **WhatsappService**: Gerenciamento de conexões WhatsApp
+- **WbotServices**: Integração com WhatsApp Web
+- **TicketService**: Gerenciamento de tickets
+- **MessageService**: Processamento de mensagens
+- **QueueService**: Gerenciamento de filas
+- **CacheService**: Gerenciamento de cache
 
 ### Frontend
-- React.js
-- Material-UI
-- Context API
-- Socket.IO Client
 
-## 💻 Requisitos do Sistema
+#### 1. Páginas Principais
+- Login
+- Dashboard
+- Tickets (Lista e Detalhes)
+- Contatos
+- Filas
+- Configurações
+- Relatórios
+- Kanban
 
-### Recomendação de VPS
-- **BASIC**: 4 vCores, 6 GB RAM, 100 GB SSD NVMe
-- **STANDARD**: 6 vCores, 12 GB RAM, 200 GB SSD NVMe
+#### 2. Componentes Principais
+- TicketsList
+- TicketInfo
+- MessagesList
+- ContactDrawer
+- QueueSelect
+- WhatsAppModal
+- Dashboard
+- QuickAnswers
+- TagsContainer
 
-### Software
+#### 3. Contextos
+- Auth
+- WhatsApp
+- Tickets
+- Notifications
+
+## ⚙️ Configurações Técnicas
+
+### Backend
+
+```env
+NODE_ENV=development
+BACKEND_URL=http://localhost:8080
+FRONTEND_URL=http://localhost:3000
+PORT=8080
+
+DB_DIALECT=postgres
+DB_HOST=localhost
+DB_USER=postgres
+DB_PASS=postgres
+DB_NAME=whaticket
+
+JWT_SECRET=your_jwt_secret
+JWT_REFRESH_SECRET=your_refresh_token_secret
+
+REDIS_URI=redis://localhost:6379
+REDIS_OPT_LIMITER_MAX=1
+REDIS_OPT_LIMITER_DURATION=3000
+
+USER_LIMIT=3
+CONNECTIONS_LIMIT=1
+```
+
+### Frontend
+
+```env
+REACT_APP_BACKEND_URL=http://localhost:8080
+REACT_APP_HOURS_CLOSE_TICKETS_AUTO=24
+REACT_APP_PAGE_LIMIT=20
+```
+
+## 🔄 Fluxo de Dados
+
+1. **Recebimento de Mensagem**
+   ```
+   WhatsApp → Webhook → Backend → Redis Queue → Frontend (Socket.io)
+   ```
+
+2. **Envio de Mensagem**
+   ```
+   Frontend → Backend API → WhatsApp Service → WhatsApp
+   ```
+
+3. **Gestão de Tickets**
+   ```
+   Mensagem → Ticket Service → Queue Service → Socket.io → Frontend
+   ```
+
+## 🛠️ Recursos Técnicos
+
+### Backend
 - Node.js 20.x
-- PostgreSQL
-- Redis (opcional)
+- TypeScript
+- Express
+- Sequelize ORM
+- Socket.IO
+- Bull (Redis Queue)
+- @whiskeysockets/baileys
+- JWT Authentication
+- Yup Validation
+- Multer (Upload)
+- Winston (Logs)
 
-## 🔌 Integrações
+### Frontend
+- React 17+
+- Material-UI
+- Socket.IO Client
+- Axios
+- React Context API
+- React Hooks
+- Formik
+- Yup Validation
+- date-fns
+- React-toastify
 
-O sistema oferece integração com diversas plataformas:
-- 🗣️ DialogFlow
-- 🔄 N8N
-- 🌐 WebHooks
-- 🤖 TypeBot
-- 💬 ChatGPT
+## 📦 Integrações
 
-## 📦 Atualizações Recentes
+### 1. DialogFlow
+- Configuração via API
+- Processamento de intenções
+- Respostas automáticas
 
-### 📅 Versão 6.0.0 (16/04/2025)
-- 🌑 Melhorias no Darkmode
-- 📊 Nova Dashboard
-- 🎟️ Layout de tickets atualizado
-- ⚡ Novo sistema de respostas rápidas
-- 🌍 Suporte a traduções
-- 📆 Sistema de agendamento aprimorado
+### 2. N8N
+- Webhooks personalizados
+- Automação de fluxos
+- Integração com APIs externas
 
-### 📅 Versão 5.5.0 (13/12/2024)
-- 📊 Dashboard reformulado
-- 📈 Nova página de relatórios
-- 🗂️ Kanban atualizado
-- 🎧 Melhorias no áudio
-- 📲 Gestão de filas aprimorada
+### 3. ChatGPT
+- Processamento de linguagem natural
+- Respostas automáticas
+- Análise de sentimento
 
-## 🆘 Suporte
+### 4. TypeBot
+- Fluxos de conversação
+- Coleta de dados
+- Automação de respostas
 
-O sistema inclui suporte básico para questões técnicas. Para suporte adicional ou personalizado, entre em contato com nossa equipe.
+## 🔒 Segurança
 
-## 📄 Licença
+### 1. Autenticação
+- JWT Token
+- Refresh Token
+- Bcrypt para senhas
+- Rate Limiting
 
-Este projeto está sob a licença especificada no arquivo LICENSE.txt.
+### 2. Permissões
+- ACL (Access Control List)
+- Roles (admin, user)
+- Queue permissions
+
+### 3. Proteção
+- Helmet
+- CORS
+- Rate Limit
+- SQL Injection Protection
+- XSS Protection
+
+## 📊 Monitoramento
+
+- Winston Logs
+- Sentry Integration
+- Performance Metrics
+- Queue Monitoring
+- Connection Status
+
+## 🚀 Escalabilidade
+
+- Redis Cache
+- Queue Processing
+- Load Balancing Ready
+- Horizontal Scaling
+- Database Indexing
 
 ---
 
-💡 **Nota**: Mantenha seu sistema sempre atualizado para aproveitar as últimas funcionalidades e correções de segurança.
-
-# WhaTicket Versão Saas com Módulo Kanban, Modo Noturno e as seguintes integrações:</br>
-
-🗣️ DialogFlow</br>
-🔄 N8N</br>
-🌐 WebHooks</br>
-🤖 TypeBot</br>
-💬 ChatGPT</br>
-
-Sugestão de VPS:
-
-BASIC: 4 vCores, 6 GB de RAM e 100 GB de SSD NVMe $4.99 USD Mensal com taxa de setup de $4.99.
-
-STANDARD: 6 vCores, 12 GB de RAM e 200 GB de SSD NVMe $9.99 USD Mensal com taxa de setup de $5.99.
-
-Informações Importantes:
-Apenas Suporte Básico
-
-Notas Internas:</br>
-Nova Atualização de Maio de 2025</br>
-Mantido Versão 6.0.0</br>
-Avaliaremos se os seguintes bugs das versão beta e a de abril foram corrigidos pelo próprio desenvolvedor: 
-Erro de Conexão, Erro Mensagem Fora do Expediente, Nome dos dias no modal de filas (ok), não criar faturas (ok), não editar empresas (ok), importar contatos do telefone (nok), não enviar e-mail de recuperação de senha (não testado).
-
-📅 16/04/2025 – Versão 6.0.0
-
-🌑 Correções no Darkmode (dentro das mensagens)</br>
-🔄 Botão Light/Dark movido (está no perfil)</br>
-📊 Estilos dos cards da Dashboard alterados (removido botão de impressão)</br>
-🎟️ Estilo de ticket alterado</br>
-⚡ Respostas rápidas (layout novo)</br>
-📂 Correção no envio de menu (filas) – na 3ª tentativa é enviado automaticamente para a 1ª fila</br>
-🌍 Botão de tradução</br>
-⚠️ Aviso de contato (caso o ticket esteja aberto, é emitido um aviso)</br>
-🔧 Página de conexão reformulada</br>
-👑 Adicionada opção de SuperAdmin (dentro do popup do usuário)</br>
-📆 Correção no agendamento (agora envia imagem com texto)</br>
-♻️ Agendamento reformulado (com suporte a ciclos)</br> 
-🔐 Novo layout da tela de login</br>
-📝 Novo layout da tela de signup</br>
-🛠️ Correção de vazamento no WebSocket</br>
-
-📅 13/12/2024 – Versão 5.5.0
-
-🛠️ Correção ao redimensionar área de ticket</br>
-✅ Validação de número no ContactModal</br>
-🔄 Regressão OpenAI para versão 3.3.0 e wbotMessageListener.ts</br>
-🎧 Áudio no iPhone</br>
-📵 Recusando chamadas automaticamente</br>
-📲 Filas da conexão ao requisitar novo QR Code</br>
-📊 Dashboard reformulado</br>
-📈 Página de relatórios</br>
-🗂️ Kanban reformulado</br>
-
-📅 07/11/2024 – Versão 5.3.5
-
-📅 Correção da Data de Vencimento no Topo: Data agora permanece fixa. </br>
-🔄 Automação em Grupos: Não envia automações para grupos. </br>
-🚫 Botão disableBot: Desabilita bots ou automações. </br>
-✉️ Correção de Mensagem Citada. </br>
-🔗 Permissão para Conexões com Mesmo Nome. </br>
-⏳ Expiração de Conexões: Desconexão automática após vencimento da empresa. </br>
-🗑️ Seleção para Deletar Contatos: Opção de seleção para exclusão na página "Contatos". </br>
-🎵 Correção no Envio de Áudio OGG em respostas rápidas. </br>
-📂 Visualização de Tickets Fechados por Operador: Aba removida do painel de usuários. </br>
-📜 Visualização de Grupos por Operador: Aba removida do painel de usuários. </br>
-💸 Atualização Financeira após Alteração de Plano: Valor ajustado automaticamente na lista do Financeiro. </br>
-
-24/07/2024 – Versão 5.2.6
-
-✅ Fechar todos os tickets abertos ou em espera. </br>
-👍 Reagir a uma mensagem. </br>
-🔄 Encaminhar mensagens para outro ticket. </br>
-🎨 Aparência do menu aprimorada. </br>
-🚪 Botão "Sair" adicionado ao menu. </br>
-🗑️ Notificação quando uma mensagem é apagada no WhatsApp, informando no chat. </br>
-🔄 API atualizada. </br>
-🆕 Novo layout da página de login. </br>
-💬 Indicação "Digitando" ou "Gravando" aparece no ticket, no canto inferior direito, ao lado do nome. </br>
-
-Biblioteca Baileys Atualizada:</br>
-
-V 6.7.16
-
-Instalador atualizado, versao NodeJS 20:
+💡 **Nota**: Esta documentação é um guia técnico detalhado. Para informações de uso, consulte o manual do usuário. 
