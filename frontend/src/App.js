@@ -36,12 +36,12 @@ const App = () => {
                 "&::-webkit-scrollbar": {
                     width: '8px',
                     height: '8px',
-					borderRadius: "8px",
+                    borderRadius: "8px",
                 },
                 "&::-webkit-scrollbar-thumb": {
                     boxShadow: 'inset 0 0 6px rgba(0, 0, 0, 0.3)',
-                    backgroundColor: "#2DDD7F",
-					borderRadius: "8px",
+                    backgroundColor: "#3CB5C9",
+                    borderRadius: "8px",
                 },
             },
             scrollbarStylesSoft: {
@@ -56,12 +56,12 @@ const App = () => {
             },
             palette: {
                 type: mode,
-                primary: { main: mode === "light" ? "#2DDD7F" : "#FFFFFF" },
-                quicktags: { main: mode === "light" ? "#2DDD7F" : "#2DDD7F" },
-				sair: { main: mode === "light" ? "#2DDD7F" : "#333" },
-				vcard: { main: mode === "light" ? "#2DDD7F" : "#666" },
-                textPrimary: mode === "light" ? "#2DDD7F" : "#FFFFFF",
-                borderPrimary: mode === "light" ? "#2DDD7F" : "#FFFFFF",
+                primary: { main: mode === "light" ? "#3CB5C9" : "#FFFFFF" },
+                quicktags: { main: mode === "light" ? "#3CB5C9" : "#3CB5C9" },
+				sair: { main: mode === "light" ? "#3CB5C9" : "#333" },
+				vcard: { main: mode === "light" ? "#3CB5C9" : "#666" },
+                textPrimary: mode === "light" ? "#3CB5C9" : "#FFFFFF",
+                borderPrimary: mode === "light" ? "#3CB5C9" : "#FFFFFF",
                 dark: { main: mode === "light" ? "#333333" : "#F3F3F3" },
                 light: { main: mode === "light" ? "#F3F3F3" : "#333333" },
                 tabHeaderBackground: mode === "light" ? "#EEE" : "#666",
@@ -83,11 +83,26 @@ const App = () => {
                 total: mode === "light" ? "#fff" : "#222",
                 messageIcons: mode === "light" ? "grey" : "#F3F3F3",
                 inputBackground: mode === "light" ? "#FFFFFF" : "#333",
-                barraSuperior: mode === "light" ? "linear-gradient(to right, #2DDD7F, #2DDD7F , #2DDD7F)" : "#666",
+                barraSuperior: mode === "light" ? "linear-gradient(to right, #3CB5C9, #3CB5C9 , #3CB5C9)" : "#666",
 				boxticket: mode === "light" ? "#EEE" : "#666",
 				campaigntab: mode === "light" ? "#ededed" : "#666",
 				mediainput: mode === "light" ? "#ededed" : "#1c1c1c",
 				contadordash: mode == "light" ? "#fff" : "#fff",
+            },
+            overrides: {
+                MuiTabs: {
+                    indicator: {
+                        backgroundColor: "#3CB5C9"
+                    }
+                },
+                MuiTab: {
+                    root: {
+                        "&$selected": {
+                            color: "#3CB5C9"
+                        }
+                    },
+                    selected: {}
+                }
             },
             mode,
         },
