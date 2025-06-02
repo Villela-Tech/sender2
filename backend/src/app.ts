@@ -54,11 +54,11 @@ app.use(helmet({
 }));
 
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
+  windowMs: 5 * 60 * 1000,
+  max: 500,
   standardHeaders: true,
   legacyHeaders: false,
-  message: 'Muitas requisições deste IP, tente novamente após 15 minutos',
+  message: 'Muitas requisições deste IP, tente novamente após 5 minutos',
   skip: (req) => {
     return req.ip === '127.0.0.1' || req.ip === '::1';
   }
