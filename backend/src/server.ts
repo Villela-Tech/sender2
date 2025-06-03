@@ -45,7 +45,7 @@ process.on("unhandledRejection", (reason, p) => {
 });
 
 
-cron.schedule("*/5 * * * *", async () => {  // De 1 minuto para 5 minutos
+cron.schedule("*/1 * * * *", async () => {  // De 5 minutos para 1 minuto
   try {
     logger.info(`Serviço de transferência de tickets iniciado`);
     await TransferTicketQueue();

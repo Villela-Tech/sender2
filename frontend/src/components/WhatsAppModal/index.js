@@ -355,66 +355,63 @@ const whatsappData = {
                 <div>
                   <h3>{i18n.t("whatsappModal.form.queueRedirection")}</h3>
                   <p>{i18n.t("whatsappModal.form.queueRedirectionDesc")}</p>
-				<Grid container spacing={2}>
-                  <Grid item sm={6} >
-                    <Field
-                      fullWidth
-                      type="number"
-                      as={TextField}
-                      label='Transferir após x (minutos)'
-                      name="timeToTransfer"
-                      error={touched.timeToTransfer && Boolean(errors.timeToTransfer)}
-                      helperText={touched.timeToTransfer && errors.timeToTransfer}
-                      variant="outlined"
-                      margin="dense"
-                      className={classes.textField}
-                      InputLabelProps={{ shrink: values.timeToTransfer ? true : false }}
-                    />
-
-                  </Grid>
-
-                  <Grid item sm={6}>
-                    <QueueSelect
-                      selectedQueueIds={selectedQueueId}
-                      onChange={(selectedId) => {
-                        setSelectedQueueId(selectedId)
-                      }}
-                      multiple={false}
-                      title={'Fila de Transferência'}
-                    />
-                  </Grid>
-
-                  </Grid>
-                  <Grid spacing={2} container>
-                    {/* ENCERRAR CHATS ABERTOS APÓS X HORAS */}
-                    <Grid xs={12} md={12} item>
+                  <Grid container spacing={2}>
+                    <Grid item sm={6}>
                       <Field
-                        as={TextField}
-                        label={i18n.t("whatsappModal.form.expiresTicket")}
                         fullWidth
-                        name="expiresTicket"
+                        type="number"
+                        as={TextField}
+                        label="Transferir após x (minutos)"
+                        name="timeToTransfer"
+                        error={touched.timeToTransfer && Boolean(errors.timeToTransfer)}
+                        helperText={touched.timeToTransfer && errors.timeToTransfer}
                         variant="outlined"
                         margin="dense"
-                        error={touched.expiresTicket && Boolean(errors.expiresTicket)}
-                        helperText={touched.expiresTicket && errors.expiresTicket}
+                        className={classes.textField}
+                        InputLabelProps={{ shrink: true }}
+                      />
+                    </Grid>
+                    <Grid item sm={6}>
+                      <QueueSelect
+                        selectedQueueIds={selectedQueueId}
+                        onChange={(selectedId) => {
+                          setSelectedQueueId(selectedId)
+                        }}
+                        multiple={false}
+                        title="Fila de Transferência"
                       />
                     </Grid>
                   </Grid>
-                  {/* MENSAGEM POR INATIVIDADE*/}
-                  <div>
+                </div>
+                <Grid spacing={2} container>
+                  {/* ENCERRAR CHATS ABERTOS APÓS X HORAS */}
+                  <Grid xs={12} md={12} item>
                     <Field
                       as={TextField}
-                      label={i18n.t("whatsappModal.form.expiresInactiveMessage")}
-                      multiline
-                      rows={4}
+                      label={i18n.t("whatsappModal.form.expiresTicket")}
                       fullWidth
-                      name="expiresInactiveMessage"
-                      error={touched.expiresInactiveMessage && Boolean(errors.expiresInactiveMessage)}
-                      helperText={touched.expiresInactiveMessage && errors.expiresInactiveMessage}
+                      name="expiresTicket"
                       variant="outlined"
                       margin="dense"
+                      error={touched.expiresTicket && Boolean(errors.expiresTicket)}
+                      helperText={touched.expiresTicket && errors.expiresTicket}
                     />
-                  </div>
+                  </Grid>
+                </Grid>
+                {/* MENSAGEM POR INATIVIDADE*/}
+                <div>
+                  <Field
+                    as={TextField}
+                    label={i18n.t("whatsappModal.form.expiresInactiveMessage")}
+                    multiline
+                    rows={4}
+                    fullWidth
+                    name="expiresInactiveMessage"
+                    error={touched.expiresInactiveMessage && Boolean(errors.expiresInactiveMessage)}
+                    helperText={touched.expiresInactiveMessage && errors.expiresInactiveMessage}
+                    variant="outlined"
+                    margin="dense"
+                  />
                 </div>
               </DialogContent>
               <DialogActions>
