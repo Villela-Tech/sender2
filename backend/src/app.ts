@@ -6,7 +6,6 @@ import "express-async-errors";
 import "reflect-metadata";
 import "./bootstrap";
 import helmet from "helmet";
-import rateLimit from "express-rate-limit";
 import { v4 as uuidv4 } from "uuid";
 
 import bodyParser from 'body-parser';
@@ -52,19 +51,6 @@ app.use(helmet({
     }
   }
 }));
-
-const apiLimiter = rateLimit({
-  windowMs: 5 * 60 * 1000,
-  max: 500,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: 'Muitas requisições deste IP, tente novamente após 5 minutos',
-  skip: (req) => {
-    return req.ip === '127.0.0.1' || req.ip === '::1';
-  }
-});
-
-app.use('/auth', apiLimiter);
 
 app.use(
   cors({
