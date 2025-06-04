@@ -418,9 +418,9 @@ function getDateLastMessage(contact) {
 									</MenuItem>
 									<MenuItem
 										onClick={() => {
-											fileUploadRef.current.value = null; // Limpa o valor do input
-											fileUploadRef.current.click(); // Dispara o clique no input de upload
-											popupState.close(); // Fecha o menu
+											fileUploadRef.current.value = null;
+											fileUploadRef.current.click();
+											popupState.close();
 										}}
 									>
 											<Backup
@@ -430,7 +430,7 @@ function getDateLastMessage(contact) {
                                                 marginRight: 10,
                                             }}
                                         />
-										{i18n.t("contacts.buttons.importSheet")}
+										Importar CSV
 									</MenuItem>
                                     <MenuItem>
                         
@@ -444,7 +444,7 @@ function getDateLastMessage(contact) {
                                             
                                                 }}                                                
                                         />        
-                                        Exportar Excel                                
+                                        Exportar CSV                               
                                    </CSVLink>
                                         
                                     </MenuItem>
@@ -474,7 +474,7 @@ function getDateLastMessage(contact) {
               id="upload"
               name="file"
               type="file"
-              accept=".xls,.xlsx"
+              accept=".csv"
               onChange={() => {
                 setConfirmOpen(true);
               }}
