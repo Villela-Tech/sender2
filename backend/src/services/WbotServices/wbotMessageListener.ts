@@ -31,7 +31,7 @@ import {
   SpeechSynthesizer
 } from "microsoft-cognitiveservices-speech-sdk";
 import moment from "moment";
-import { ChatCompletionRequestMessage, Configuration, OpenAIApi } from "openai";
+import OpenAI from "openai";
 import { Op } from "sequelize";
 import { debounce } from "../../helpers/Debounce";
 import formatBody from "../../helpers/Mustache";
@@ -81,8 +81,9 @@ type Session = WASocket & {
   store?: Store;
 };
 
-interface SessionOpenAi extends OpenAIApi {
-  id?: number;
+interface SessionOpenAi {
+  id: string;
+  openai: OpenAI;
 }
 
 const sessionsOpenAi: SessionOpenAi[] = [];
@@ -100,6 +101,11 @@ interface IMe {
 interface IMessage {
   messages: WAMessage[];
   isLatest: boolean;
+}
+
+interface OpenAIMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
 }
 
 const MESSAGE_CACHE_TTL = 300;
@@ -678,190 +684,226 @@ const handleOpenAi = async (
   contact: Contact,
   mediaSent: Message | undefined
 ): Promise<void> => {
-  const bodyMessage = getBodyMessage(msg);
-
-  if (!bodyMessage) return;
-
-
-  let { prompt } = await ShowWhatsAppService(wbot.id, ticket.companyId);
-
-
-  if (!prompt && !isNil(ticket?.queue?.prompt)) {
-    prompt = ticket.queue.prompt;
-  }
-
-  if (!prompt) return;
-
-  if (msg.messageStubType) return;
-
-  const publicFolder: string = path.resolve(
-    __dirname,
-    "..",
-    "..",
-    "..",
-    "public"
-  );
-
-  let openai: SessionOpenAi;
-  const openAiIndex = sessionsOpenAi.findIndex(s => s.id === wbot.id);
-
-
-  if (openAiIndex === -1) {
-    const configuration = new Configuration({
-      apiKey: prompt.apiKey
-    });
-    openai = new OpenAIApi(configuration);
-    openai.id = wbot.id;
-    sessionsOpenAi.push(openai);
-  } else {
-    openai = sessionsOpenAi[openAiIndex];
-  }
-
-  const messages = await Message.findAll({
-    where: { ticketId: ticket.id },
-    order: [["createdAt", "ASC"]],
-    limit: prompt.maxMessages
-  });
-
-  const promptSystem = `Nas respostas utilize o nome ${sanitizeName(
-    contact.name || "Amigo(a)"
-  )} para identificar o cliente.\nSua resposta deve usar no máximo ${prompt.maxTokens
-    } tokens e cuide para não truncar o final.\nSempre que possível, mencione o nome dele para ser mais personalizado o atendimento e mais educado. Quando a resposta requer uma transferência para o setor de atendimento, comece sua resposta com 'Ação: Transferir para o setor de atendimento'.\n
-  ${prompt.prompt}\n`;
-
-  let messagesOpenAi: ChatCompletionRequestMessage[] = [];
-
-  if (msg.message?.conversation || msg.message?.extendedTextMessage?.text) {
-    messagesOpenAi = [];
-    messagesOpenAi.push({ role: "system", content: promptSystem });
-    for (
-      let i = 0;
-      i < Math.min(prompt.maxMessages, messages.length);
-      i++
-    ) {
-      const message = messages[i];
-      if (message.mediaType === "chat") {
-        if (message.fromMe) {
-          messagesOpenAi.push({ role: "assistant", content: message.body });
-        } else {
-          messagesOpenAi.push({ role: "user", content: message.body });
-        }
-      }
+  try {
+    const bodyMessage = getBodyMessage(msg);
+    if (!bodyMessage) {
+      logger.info("Mensagem vazia recebida, ignorando...");
+      return;
     }
-    messagesOpenAi.push({ role: "user", content: bodyMessage! });
 
-    const chat = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo-1106",
-      messages: messagesOpenAi,
-      max_tokens: prompt.maxTokens,
-      temperature: prompt.temperature
+    let { prompt } = await ShowWhatsAppService(wbot.id, ticket.companyId);
+    if (!prompt && !isNil(ticket?.queue?.prompt)) {
+      prompt = ticket.queue.prompt;
+    }
+
+    if (!prompt) {
+      logger.error("Prompt não encontrado para o WhatsApp/Queue");
+      return;
+    }
+
+    if (!prompt.apiKey) {
+      logger.error("API Key não configurada para o prompt");
+      return;
+    }
+
+    if (msg.messageStubType) return;
+
+    const publicFolder: string = path.resolve(__dirname, "..", "..", "..", "public");
+
+    let openai: SessionOpenAi;
+    const openAiIndex = sessionsOpenAi.findIndex(s => s.id === wbot.id.toString());
+
+    if (openAiIndex === -1) {
+      const client = new OpenAI({
+        apiKey: prompt.apiKey,
+      });
+      openai = { id: wbot.id.toString(), openai: client };
+      sessionsOpenAi.push(openai);
+    } else {
+      openai = sessionsOpenAi[openAiIndex];
+    }
+
+    // Testar a API Key
+    try {
+      await openai.openai.models.list();
+    } catch (err) {
+      logger.error("Erro ao validar API Key:", err);
+      await wbot.sendMessage(
+        `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+        { text: "API Key inválida. Por favor, configure uma API Key válida." }
+      );
+      return;
+    }
+
+    const messages = await Message.findAll({
+      where: { ticketId: ticket.id },
+      order: [["createdAt", "ASC"]],
+      limit: prompt.maxMessages
     });
 
-    let response = chat.data.choices[0].message?.content;
+    const promptSystem = `Nas respostas utilize o nome ${sanitizeName(
+        contact.name || "Amigo(a)"
+      )} para identificar o cliente.\nSua resposta deve usar no máximo ${prompt.maxTokens
+        } tokens e cuide para não truncar o final.\nSempre que possível, mencione o nome dele para ser mais personalizado o atendimento e mais educado. Quando a resposta requer uma transferência para o setor de atendimento, comece sua resposta com 'Ação: Transferir para o setor de atendimento'.\n
+      ${prompt.prompt}\n`;
 
-    if (response?.includes("Ação: Transferir para o setor de atendimento")) {
+    let messagesOpenAi: OpenAIMessage[] = [];
+
+    if (msg.message?.conversation || msg.message?.extendedTextMessage?.text) {
+      const messageContent = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
+      messagesOpenAi.push({ role: "user", content: messageContent });
+    }
+
+    logger.info(`Enviando mensagem para OpenAI: ${JSON.stringify(messagesOpenAi)}`);
+
+    const chat = await openai.openai.chat.completions.create({
+      model: "gpt-3.5-turbo-1106",
+      messages: [
+        {
+          role: "system",
+          content: prompt.prompt
+        },
+        ...messagesOpenAi.map(msg => ({
+          role: msg.role,
+          content: msg.content
+        }))
+      ],
+      max_tokens: prompt.maxTokens || 100,
+      temperature: prompt.temperature || 1,
+    });
+
+    let response = chat.choices[0].message?.content;
+    logger.info(`Resposta recebida da OpenAI: ${response}`);
+
+    if (!response) {
+      throw new Error("Resposta vazia da OpenAI");
+    }
+
+    if (response.includes("Ação: Transferir para o setor de atendimento")) {
       await transferQueue(prompt.queueId, ticket, contact);
-      response = response
-        .replace("Ação: Transferir para o setor de atendimento", "")
-        .trim();
+      response = response.replace("Ação: Transferir para o setor de atendimento", "").trim();
     }
 
     if (prompt.voice === "texto") {
       const sentMessage = await wbot.sendMessage(msg.key.remoteJid!, {
-        text: response!
+        text: response
       });
       await verifyMessage(sentMessage!, ticket, contact);
     } else {
       const fileNameWithOutExtension = `${ticket.id}_${Date.now()}`;
-      convertTextToSpeechAndSaveToFile(
-        keepOnlySpecifiedChars(response!),
+      await convertTextToSpeechAndSaveToFile(
+        keepOnlySpecifiedChars(response),
         `${publicFolder}/${fileNameWithOutExtension}`,
         prompt.voiceKey,
         prompt.voiceRegion,
         prompt.voice,
         "mp3"
-      ).then(async () => {
-        try {
-          const sendMessage = await wbot.sendMessage(msg.key.remoteJid!, {
-            audio: { url: `${publicFolder}/${fileNameWithOutExtension}.mp3` },
-            mimetype: "audio/mpeg",
-            ptt: true
-          });
-          await verifyMediaMessage(sendMessage!, ticket, contact);
-          deleteFileSync(`${publicFolder}/${fileNameWithOutExtension}.mp3`);
-          deleteFileSync(`${publicFolder}/${fileNameWithOutExtension}.wav`);
-        } catch (error) {
-          console.log(`Erro para responder com audio: ${error}`);
-        }
-      });
+      );
+      
+      try {
+        const sendMessage = await wbot.sendMessage(msg.key.remoteJid!, {
+          audio: { url: `${publicFolder}/${fileNameWithOutExtension}.mp3` },
+          mimetype: "audio/mpeg",
+          ptt: true
+        });
+        await verifyMediaMessage(sendMessage!, ticket, contact);
+      } catch (error) {
+        logger.error(`Erro ao enviar áudio: ${error}`);
+        throw error;
+      } finally {
+        deleteFileSync(`${publicFolder}/${fileNameWithOutExtension}.mp3`);
+        deleteFileSync(`${publicFolder}/${fileNameWithOutExtension}.wav`);
+      }
     }
-  } else if (msg.message?.audioMessage) {
-    const mediaUrl = mediaSent!.mediaUrl!.split("/").pop();
-    const file = fs.createReadStream(`${publicFolder}/${mediaUrl}`) as any;
-    const transcription = await openai.createTranscription(file, "whisper-1");
 
-    messagesOpenAi = [];
-    messagesOpenAi.push({ role: "system", content: promptSystem });
-    for (
-      let i = 0;
-      i < Math.min(prompt.maxMessages, messages.length);
-      i++
-    ) {
-      const message = messages[i];
-      if (message.mediaType === "chat") {
-        if (message.fromMe) {
-          messagesOpenAi.push({ role: "assistant", content: message.body });
+    if (msg.message?.audioMessage) {
+      const buffer = await downloadMedia(msg);
+      const fileName = `${ticket.id}_${moment().unix()}.ogg`;
+      const filePath = path.join(publicFolder, fileName);
+      await fs.promises.writeFile(filePath, buffer);
+
+      try {
+        const transcription = await openai.openai.audio.transcriptions.create({
+          file: fs.createReadStream(filePath),
+          model: "whisper-1"
+        });
+        logger.info(`Transcrição do áudio: ${transcription.text}`);
+
+        messagesOpenAi = [];
+        messagesOpenAi.push({ role: "user", content: transcription.text });
+
+        const chat = await openai.openai.chat.completions.create({
+          model: "gpt-3.5-turbo-1106",
+          messages: [
+            {
+              role: "system",
+              content: prompt.prompt
+            },
+            ...messagesOpenAi
+          ],
+          max_tokens: prompt.maxTokens || 100,
+          temperature: prompt.temperature || 1,
+        });
+
+        let response = chat.choices[0].message?.content;
+        logger.info(`Resposta para áudio: ${response}`);
+
+        if (!response) {
+          throw new Error("Resposta vazia da OpenAI para áudio");
+        }
+
+        if (response.includes("Ação: Transferir para o setor de atendimento")) {
+          await transferQueue(prompt.queueId, ticket, contact);
+          response = response.replace("Ação: Transferir para o setor de atendimento", "").trim();
+        }
+
+        if (prompt.voice === "texto") {
+          const sentMessage = await wbot.sendMessage(msg.key.remoteJid!, {
+            text: response
+          });
+          await verifyMessage(sentMessage!, ticket, contact);
         } else {
-          messagesOpenAi.push({ role: "user", content: message.body });
+          const fileNameWithOutExtension = `${ticket.id}_${Date.now()}`;
+          await convertTextToSpeechAndSaveToFile(
+            keepOnlySpecifiedChars(response),
+            `${publicFolder}/${fileNameWithOutExtension}`,
+            prompt.voiceKey,
+            prompt.voiceRegion,
+            prompt.voice,
+            "mp3"
+          );
+          
+          try {
+            const sendMessage = await wbot.sendMessage(msg.key.remoteJid!, {
+              audio: { url: `${publicFolder}/${fileNameWithOutExtension}.mp3` },
+              mimetype: "audio/mpeg",
+              ptt: true
+            });
+            await verifyMediaMessage(sendMessage!, ticket, contact);
+          } catch (error) {
+            logger.error(`Erro ao enviar áudio: ${error}`);
+            throw error;
+          } finally {
+            deleteFileSync(`${publicFolder}/${fileNameWithOutExtension}.mp3`);
+            deleteFileSync(`${publicFolder}/${fileNameWithOutExtension}.wav`);
+          }
+        }
+      } finally {
+        try {
+          await fs.promises.unlink(filePath);
+        } catch (err) {
+          logger.error("Erro ao deletar arquivo de áudio:", err);
         }
       }
     }
-    messagesOpenAi.push({ role: "user", content: transcription.data.text });
-    const chat = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo-1106",
-      messages: messagesOpenAi,
-      max_tokens: prompt.maxTokens,
-      temperature: prompt.temperature
+  } catch (error) {
+    logger.error(`Erro na integração com OpenAI: ${error}`);
+    // Envia mensagem de erro para o usuário
+    await wbot.sendMessage(msg.key.remoteJid!, {
+      text: "Desculpe, tive um problema ao processar sua mensagem. Por favor, tente novamente mais tarde."
     });
-    let response = chat.data.choices[0].message?.content;
-
-    if (response?.includes("Ação: Transferir para o setor de atendimento")) {
-      await transferQueue(prompt.queueId, ticket, contact);
-      response = response
-        .replace("Ação: Transferir para o setor de atendimento", "")
-        .trim();
-    }
-    if (prompt.voice === "texto") {
-      const sentMessage = await wbot.sendMessage(msg.key.remoteJid!, {
-        text: response!
-      });
-      await verifyMessage(sentMessage!, ticket, contact);
-    } else {
-      const fileNameWithOutExtension = `${ticket.id}_${Date.now()}`;
-      convertTextToSpeechAndSaveToFile(
-        keepOnlySpecifiedChars(response!),
-        `${publicFolder}/${fileNameWithOutExtension}`,
-        prompt.voiceKey,
-        prompt.voiceRegion,
-        prompt.voice,
-        "mp3"
-      ).then(async () => {
-        try {
-          const sendMessage = await wbot.sendMessage(msg.key.remoteJid!, {
-            audio: { url: `${publicFolder}/${fileNameWithOutExtension}.mp3` },
-            mimetype: "audio/mpeg",
-            ptt: true
-          });
-          await verifyMediaMessage(sendMessage!, ticket, contact);
-          deleteFileSync(`${publicFolder}/${fileNameWithOutExtension}.mp3`);
-          deleteFileSync(`${publicFolder}/${fileNameWithOutExtension}.wav`);
-        } catch (error) {
-          console.log(`Erro para responder com audio: ${error}`);
-        }
-      });
-    }
+    throw error;
   }
-  messagesOpenAi = [];
 };
 
 
